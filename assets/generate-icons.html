@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timero Icon Generator</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0B0D17, #2D1B4E);
+            min-height: 100vh;
+            margin: 0;
+            padding: 40px;
+            box-sizing: border-box;
+            color: white;
+        }
+        h1 {
+            text-align: center;
+            font-weight: 200;
+            letter-spacing: 4px;
+            margin-bottom: 40px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        .preview-item {
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+        }
+        .preview-item h3 {
+            margin: 15px 0 5px;
+            font-weight: 400;
+        }
+        .preview-item p {
+            color: #888;
+            font-size: 14px;
+            margin: 0;
+        }
+        canvas {
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        .btn {
+            background: #F4D03F;
+            color: #0B0D17;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: transform 0.2s;
+        }
+        .btn:hover {
+            transform: scale(1.05);
+        }
+        .instructions {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+        .instructions h2 {
+            margin-top: 0;
+            font-weight: 400;
+        }
+        .instructions ol {
+            line-height: 1.8;
+        }
+        .instructions code {
+            background: rgba(0,0,0,0.3);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>TIMERO ICON GENERATOR</h1>
+        
+        <div class="preview-grid">
+            <div class="preview-item">
+                <canvas id="icon" width="1024" height="1024"></canvas>
+                <h3>App Icon</h3>
+                <p>1024x1024 px</p>
+                <button class="btn" onclick="downloadIcon()">Download icon.png</button>
+            </div>
+            
+            <div class="preview-item">
+                <canvas id="adaptive" width="1024" height="1024"></canvas>
+                <h3>Adaptive Icon</h3>
+                <p>1024x1024 px (Android)</p>
+                <button class="btn" onclick="downloadAdaptive()">Download adaptive-icon.png</button>
+            </div>
+            
+            <div class="preview-item">
+                <canvas id="splash" width="200" height="200"></canvas>
+                <h3>Splash Icon</h3>
+                <p>200x200 px</p>
+                <button class="btn" onclick="downloadSplash()">Download splash-icon.png</button>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h2>📋 Instructions</h2>
+            <ol>
+                <li>Click the download buttons above to save each icon</li>
+                <li>Move the downloaded files to your <code>assets/</code> folder</li>
+                <li>Replace the existing placeholder files</li>
+                <li>Run <code>npx expo start --clear</code> to see the changes</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        function drawIcon(ctx, size, showBg = true) {
+            const scale = size / 200;
+            ctx.save();
+            ctx.scale(scale, scale);
+            
+            // Background
+            if (showBg) {
+                const gradient = ctx.createLinearGradient(0, 0, 200, 200);
+                gradient.addColorStop(0, '#6B4C9A');
+                gradient.addColorStop(0.5, '#2D1B4E');
+                gradient.addColorStop(1, '#0B0D17');
+                ctx.beginPath();
+                ctx.arc(100, 100, 95, 0, Math.PI * 2);
+                ctx.fillStyle = gradient;
+                ctx.fill();
+            }
+            
+            // Outer ring background
+            ctx.beginPath();
+            ctx.arc(100, 100, 75, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+            ctx.lineWidth = 8;
+            ctx.stroke();
+            
+            // Progress ring
+            const ringGradient = ctx.createLinearGradient(25, 25, 175, 175);
+            ringGradient.addColorStop(0, '#F4D03F');
+            ringGradient.addColorStop(1, '#FF6B6B');
+            ctx.beginPath();
+            ctx.arc(100, 100, 75, -Math.PI/2, Math.PI * 1.25);
+            ctx.strokeStyle = ringGradient;
+            ctx.lineWidth = 8;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+            
+            // Inner circle
+            ctx.beginPath();
+            ctx.arc(100, 100, 55, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(11, 13, 23, 0.6)';
+            ctx.fill();
+            
+            // Play triangle
+            ctx.beginPath();
+            ctx.moveTo(85, 75);
+            ctx.lineTo(125, 100);
+            ctx.lineTo(85, 125);
+            ctx.closePath();
+            ctx.fillStyle = '#F4D03F';
+            ctx.fill();
+            
+            // Stars
+            const stars = [
+                {x: 45, y: 45, r: 3, o: 0.6},
+                {x: 155, y: 60, r: 2, o: 0.4},
+                {x: 50, y: 150, r: 2, o: 0.5},
+                {x: 160, y: 145, r: 2.5, o: 0.3}
+            ];
+            stars.forEach(s => {
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255,255,255,${s.o})`;
+                ctx.fill();
+            });
+            
+            ctx.restore();
+        }
+        
+        function drawAdaptiveIcon(ctx, size) {
+            // For adaptive icon, we draw just the foreground centered
+            const scale = size / 200;
+            ctx.save();
+            ctx.scale(scale, scale);
+            
+            // Outer ring background
+            ctx.beginPath();
+            ctx.arc(100, 100, 65, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+            ctx.lineWidth = 6;
+            ctx.stroke();
+            
+            // Progress ring
+            const ringGradient = ctx.createLinearGradient(35, 35, 165, 165);
+            ringGradient.addColorStop(0, '#F4D03F');
+            ringGradient.addColorStop(1, '#FF6B6B');
+            ctx.beginPath();
+            ctx.arc(100, 100, 65, -Math.PI/2, Math.PI * 1.25);
+            ctx.strokeStyle = ringGradient;
+            ctx.lineWidth = 6;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+            
+            // Play triangle
+            ctx.beginPath();
+            ctx.moveTo(85, 75);
+            ctx.lineTo(120, 100);
+            ctx.lineTo(85, 125);
+            ctx.closePath();
+            ctx.fillStyle = '#F4D03F';
+            ctx.fill();
+            
+            ctx.restore();
+        }
+        
+        // Draw all icons
+        const iconCanvas = document.getElementById('icon');
+        const iconCtx = iconCanvas.getContext('2d');
+        drawIcon(iconCtx, 1024);
+        
+        const adaptiveCanvas = document.getElementById('adaptive');
+        const adaptiveCtx = adaptiveCanvas.getContext('2d');
+        // Fill with background color first
+        adaptiveCtx.fillStyle = '#0B0D17';
+        adaptiveCtx.fillRect(0, 0, 1024, 1024);
+        drawAdaptiveIcon(adaptiveCtx, 1024);
+        
+        const splashCanvas = document.getElementById('splash');
+        const splashCtx = splashCanvas.getContext('2d');
+        drawIcon(splashCtx, 200, false);
+        
+        function downloadCanvas(canvas, filename) {
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+        
+        function downloadIcon() {
+            downloadCanvas(document.getElementById('icon'), 'icon.png');
+        }
+        
+        function downloadAdaptive() {
+            downloadCanvas(document.getElementById('adaptive'), 'adaptive-icon.png');
+        }
+        
+        function downloadSplash() {
+            downloadCanvas(document.getElementById('splash'), 'splash-icon.png');
+        }
+    </script>
+</body>
+</html>
+
