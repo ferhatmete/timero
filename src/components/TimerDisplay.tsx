@@ -67,16 +67,19 @@ export const TimerDisplay: React.FC<TimerDisplayProps> = ({
     const completed = pomodorosCompleted % 4;
     
     for (let i = 0; i < total; i++) {
+      const isFilled = i < completed;
       indicators.push(
         <View
           key={i}
           style={[
             styles.pomodoroIndicator,
             {
-              backgroundColor: i < completed ? colors.accent : 'rgba(255,255,255,0.2)',
-              shadowColor: i < completed ? colors.accent : 'transparent',
-              shadowOpacity: i < completed ? 0.6 : 0,
-              shadowRadius: 4,
+              backgroundColor: isFilled ? colors.accent : 'transparent',
+              borderColor: isFilled ? colors.accent : 'rgba(255,255,255,0.4)',
+              borderWidth: 2,
+              shadowColor: isFilled ? colors.accent : 'transparent',
+              shadowOpacity: isFilled ? 0.8 : 0,
+              shadowRadius: 6,
               shadowOffset: { width: 0, height: 0 },
             }
           ]}
@@ -185,12 +188,12 @@ const styles = StyleSheet.create({
   },
   pomodoroContainer: {
     flexDirection: 'row',
-    marginTop: 16,
-    gap: 8,
+    marginTop: 20,
+    gap: 12,
   },
   pomodoroIndicator: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
   },
 });

@@ -28,13 +28,15 @@ const MainScreen = () => {
     pomodorosCompleted,
     toggleTimer, 
     resetTimer, 
+    fullReset,
     switchMode, 
     skipBreak,
     formatTime, 
     progress, 
     stats, 
     prefs, 
-    toggleAutoStart 
+    toggleAutoStart,
+    setNextBreakType
   } = useTimer();
   
   const [isSettingsVisible, setIsSettingsVisible] = useState(false);
@@ -73,6 +75,7 @@ const MainScreen = () => {
             mode={mode}
             onToggle={toggleTimer} 
             onReset={resetTimer}
+            onFullReset={fullReset}
             onSkip={skipBreak}
           />
           
@@ -86,6 +89,8 @@ const MainScreen = () => {
           onClose={() => setIsSettingsVisible(false)}
           autoStart={prefs.autoStart}
           onToggleAutoStart={toggleAutoStart}
+          nextBreakType={prefs.nextBreakType || 'short'}
+          onChangeNextBreakType={setNextBreakType}
         />
 
         <StatsModal

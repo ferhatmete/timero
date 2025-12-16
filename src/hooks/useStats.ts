@@ -3,6 +3,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const STATS_STORAGE_KEY = '@timero_stats';
 const PREFS_STORAGE_KEY = '@timero_prefs';
+const PREFS_VERSION_KEY = '@timero_prefs_version';
+const CURRENT_PREFS_VERSION = 2; // Increment this to reset prefs to new defaults
 
 export interface DailyStats {
   date: string;
@@ -21,8 +23,11 @@ export interface StatsData {
   totalSessions: number;
 }
 
+export type NextBreakType = 'short' | 'long';
+
 export interface UserPrefs {
   autoStart: boolean;
+  nextBreakType: NextBreakType;
 }
 
 const INITIAL_STATS: StatsData = {
@@ -33,7 +38,8 @@ const INITIAL_STATS: StatsData = {
 };
 
 const INITIAL_PREFS: UserPrefs = {
-  autoStart: false,
+  autoStart: true,
+  nextBreakType: 'short',
 };
 
 export const useStats = () => {
@@ -46,13 +52,26 @@ export const useStats = () => {
 
   const loadData = async () => {
     try {
-      const [statsStr, prefsStr] = await Promise.all([
+      const [statsStr, prefsStr, versionStr] = await Promise.all([
         AsyncStorage.getItem(STATS_STORAGE_KEY),
         AsyncStorage.getItem(PREFS_STORAGE_KEY),
+        AsyncStorage.getItem(PREFS_VERSION_KEY),
       ]);
 
       if (statsStr) setStats(JSON.parse(statsStr));
-      if (prefsStr) setPrefs(JSON.parse(prefsStr));
+      
+      const savedVersion = versionStr ? parseInt(versionStr, 10) : 0;
+      
+      // If prefs version is outdated, reset to new defaults
+      if (savedVersion < CURRENT_PREFS_VERSION) {
+        setPrefs(INITIAL_PREFS);
+        await AsyncStorage.setItem(PREFS_STORAGE_KEY, JSON.stringify(INITIAL_PREFS));
+        await AsyncStorage.setItem(PREFS_VERSION_KEY, CURRENT_PREFS_VERSION.toString());
+      } else if (prefsStr) {
+        // Load saved prefs and merge with defaults for any new fields
+        const loadedPrefs = JSON.parse(prefsStr);
+        setPrefs({ ...INITIAL_PREFS, ...loadedPrefs });
+      }
     } catch (error) {
       console.error('Failed to load stats/prefs:', error);
     }
@@ -69,6 +88,16 @@ export const useStats = () => {
 
   const toggleAutoStart = async () => {
     const newPrefs = { ...prefs, autoStart: !prefs.autoStart };
+    setPrefs(newPrefs);
+    try {
+      await AsyncStorage.setItem(PREFS_STORAGE_KEY, JSON.stringify(newPrefs));
+    } catch (error) {
+      console.error('Failed to save prefs:', error);
+    }
+  };
+
+  const setNextBreakType = async (type: NextBreakType) => {
+    const newPrefs = { ...prefs, nextBreakType: type };
     setPrefs(newPrefs);
     try {
       await AsyncStorage.setItem(PREFS_STORAGE_KEY, JSON.stringify(newPrefs));
@@ -135,6 +164,7 @@ export const useStats = () => {
     stats,
     prefs,
     toggleAutoStart,
+    setNextBreakType,
     recordSession,
   };
 };

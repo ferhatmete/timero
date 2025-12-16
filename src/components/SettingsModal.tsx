@@ -1,23 +1,17 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, Modal, TouchableOpacity, StyleSheet, ScrollView, Switch } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
-import { X, Check } from 'lucide-react-native';
-import { useStats } from '../hooks/useStats';
+import { X, Check, Circle } from 'lucide-react-native';
+import { NextBreakType } from '../hooks/useStats';
 
 interface SettingsModalProps {
   visible: boolean;
   onClose: () => void;
-  // We can pass stats hook functions if needed, or use the hook inside if context allows.
-  // Since useStats uses AsyncStorage and local state, using it here might create a separate instance state 
-  // if not lifted. For simple prefs it's fine, but to sync with timer logic, 
-  // we might want to pass the toggle function from parent or use a Context.
-  // For this MVP, let's just use the hook here for prefs toggling, assuming AsyncStorage is the source of truth.
-  // However, updating prefs here won't update the timer's copy if it loaded once. 
-  // Better to pass prefs/toggle from App -> SettingsModal or use a Context. 
-  // Refactoring to Context is safer but let's stick to props for simplicity first.
   autoStart: boolean;
   onToggleAutoStart: () => void;
+  nextBreakType: NextBreakType;
+  onChangeNextBreakType: (type: NextBreakType) => void;
 }
 
 const LANGUAGES = [
@@ -38,7 +32,14 @@ const LANGUAGES = [
   { code: 'sv', label: 'Svenska' },
 ];
 
-export const SettingsModal: React.FC<SettingsModalProps> = ({ visible, onClose, autoStart, onToggleAutoStart }) => {
+export const SettingsModal: React.FC<SettingsModalProps> = ({ 
+  visible, 
+  onClose, 
+  autoStart, 
+  onToggleAutoStart,
+  nextBreakType,
+  onChangeNextBreakType 
+}) => {
   const { colors } = useTheme();
   const { i18n, t } = useTranslation();
 
@@ -68,14 +69,58 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ visible, onClose, 
           <ScrollView contentContainerStyle={styles.contentList}>
             <View style={styles.section}>
               <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>{t('preferences') || 'Preferences'}</Text>
+              
+              {/* Auto-start setting */}
               <View style={[styles.settingItem, { borderBottomColor: colors.textSecondary }]}>
-                <Text style={[styles.settingText, { color: colors.text }]}>{t('autoStart') || 'Auto-start next cycle'}</Text>
+                <View style={styles.settingTextContainer}>
+                  <Text style={[styles.settingText, { color: colors.text }]}>{t('autoStart') || 'Auto-start next cycle'}</Text>
+                  <Text style={[styles.settingDesc, { color: colors.textSecondary }]}>{t('autoStartDesc')}</Text>
+                </View>
                 <Switch
                   trackColor={{ false: "#767577", true: colors.accent }}
-                  thumbColor={autoStart ? colors.primary : "#f4f3f4"}
+                  thumbColor={autoStart ? "#ffffff" : "#f4f3f4"}
+                  ios_backgroundColor="#3e3e3e"
                   onValueChange={onToggleAutoStart}
                   value={autoStart}
                 />
+              </View>
+
+              {/* Next break type setting */}
+              <View style={[styles.settingItemColumn, { borderBottomColor: colors.textSecondary }]}>
+                <Text style={[styles.settingText, { color: colors.text }]}>{t('nextBreakType') || 'Break type after focus'}</Text>
+                <Text style={[styles.settingDesc, { color: colors.textSecondary, marginBottom: 12 }]}>{t('nextBreakTypeDesc')}</Text>
+                
+                {/* Short Break Option */}
+                <TouchableOpacity 
+                  style={[styles.radioOption, nextBreakType === 'short' && { backgroundColor: colors.accent + '20' }]}
+                  onPress={() => onChangeNextBreakType('short')}
+                >
+                  <View style={styles.radioLeft}>
+                    <View style={[styles.radioCircle, { borderColor: colors.accent }]}>
+                      {nextBreakType === 'short' && <View style={[styles.radioFill, { backgroundColor: colors.accent }]} />}
+                    </View>
+                    <View style={styles.radioTextContainer}>
+                      <Text style={[styles.radioLabel, { color: colors.text }]}>{t('shortBreakOption') || 'Short Break (5 min)'}</Text>
+                      <Text style={[styles.radioDesc, { color: colors.textSecondary }]}>{t('shortBreakDesc')}</Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+
+                {/* Long Break Option */}
+                <TouchableOpacity 
+                  style={[styles.radioOption, nextBreakType === 'long' && { backgroundColor: colors.accent + '20' }]}
+                  onPress={() => onChangeNextBreakType('long')}
+                >
+                  <View style={styles.radioLeft}>
+                    <View style={[styles.radioCircle, { borderColor: colors.accent }]}>
+                      {nextBreakType === 'long' && <View style={[styles.radioFill, { backgroundColor: colors.accent }]} />}
+                    </View>
+                    <View style={styles.radioTextContainer}>
+                      <Text style={[styles.radioLabel, { color: colors.text }]}>{t('longBreakOption') || 'Long Break (15 min)'}</Text>
+                      <Text style={[styles.radioDesc, { color: colors.textSecondary }]}>{t('longBreakDesc')}</Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
               </View>
             </View>
 
@@ -159,8 +204,61 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
+  settingItemColumn: {
+    flexDirection: 'column',
+    paddingVertical: 15,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  settingTextContainer: {
+    flex: 1,
+    marginRight: 10,
+  },
   settingText: {
     fontSize: 16,
+  },
+  settingDesc: {
+    fontSize: 12,
+    marginTop: 4,
+    opacity: 0.8,
+  },
+  radioOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    marginBottom: 8,
+  },
+  radioLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  radioCircle: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  radioFill: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+  },
+  radioTextContainer: {
+    flex: 1,
+  },
+  radioLabel: {
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  radioDesc: {
+    fontSize: 12,
+    marginTop: 2,
+    opacity: 0.8,
   },
   languageItem: {
     flexDirection: 'row',

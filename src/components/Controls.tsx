@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet, Text } from 'react-native';
-import { Play, Pause, RotateCcw, SkipForward } from 'lucide-react-native';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { Play, Pause, RotateCcw, SkipForward, RefreshCcw } from 'lucide-react-native';
 import { useTheme } from '../context/ThemeContext';
 import * as Haptics from 'expo-haptics';
 import { TimerMode } from '../hooks/useTimer';
@@ -10,6 +10,7 @@ interface ControlsProps {
   mode: TimerMode;
   onToggle: () => void;
   onReset: () => void;
+  onFullReset: () => void;
   onSkip: () => void;
 }
 
@@ -18,6 +19,7 @@ export const Controls: React.FC<ControlsProps> = ({
   mode,
   onToggle, 
   onReset,
+  onFullReset,
   onSkip 
 }) => {
   const { colors } = useTheme();
@@ -41,7 +43,7 @@ export const Controls: React.FC<ControlsProps> = ({
 
   return (
     <View style={styles.container}>
-      {/* Reset Button */}
+      {/* Reset Timer Button */}
       <TouchableOpacity
         style={[styles.secondaryButton, { backgroundColor: colors.cardBackground }]}
         onPress={() => handlePress(onReset, 'light')}
@@ -63,20 +65,17 @@ export const Controls: React.FC<ControlsProps> = ({
         )}
       </TouchableOpacity>
 
-      {/* Skip Button (only visible during breaks) */}
+      {/* Skip Button (during breaks) / Full Reset Button (during work) */}
       <TouchableOpacity
-        style={[
-          styles.secondaryButton, 
-          { 
-            backgroundColor: isBreak ? colors.cardBackground : 'transparent',
-            opacity: isBreak ? 1 : 0
-          }
-        ]}
-        onPress={() => isBreak && handlePress(onSkip, 'light')}
+        style={[styles.secondaryButton, { backgroundColor: colors.cardBackground }]}
+        onPress={() => handlePress(isBreak ? onSkip : onFullReset, 'light')}
         activeOpacity={0.7}
-        disabled={!isBreak}
       >
-        <SkipForward size={22} color={colors.text} />
+        {isBreak ? (
+          <SkipForward size={22} color={colors.text} />
+        ) : (
+          <RefreshCcw size={22} color={colors.text} />
+        )}
       </TouchableOpacity>
     </View>
   );
