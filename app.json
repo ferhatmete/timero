@@ -21,7 +21,9 @@
       "bundleIdentifier": "com.ferhatmete.timero",
       "buildNumber": "1",
       "infoPlist": {
-        "UIBackgroundModes": ["audio"]
+        "UIBackgroundModes": [
+          "audio"
+        ]
       }
     },
     "android": {
@@ -32,7 +34,9 @@
       "edgeToEdgeEnabled": true,
       "package": "com.ferhatmete.timero",
       "versionCode": 1,
-      "permissions": ["VIBRATE"]
+      "permissions": [
+        "VIBRATE"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -51,8 +55,9 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "your-project-id-here"
+        "projectId": "d84088a0-98c0-48e9-871a-cc85dabdbf1f"
       }
-    }
+    },
+    "owner": "ferhatmete"
   }
 }
