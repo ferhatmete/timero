@@ -109,6 +109,13 @@
                 <p>200x200 px</p>
                 <button class="btn" onclick="downloadSplash()">Download splash-icon.png</button>
             </div>
+            
+            <div class="preview-item">
+                <canvas id="favicon" width="32" height="32"></canvas>
+                <h3>Favicon</h3>
+                <p>32x32 px (Web)</p>
+                <button class="btn" onclick="downloadFavicon()">Download favicon.png</button>
+            </div>
         </div>
         
         <div class="instructions">
@@ -128,43 +135,39 @@
             ctx.save();
             ctx.scale(scale, scale);
             
-            // Background
+            // Background - dark color matching app theme
             if (showBg) {
-                const gradient = ctx.createLinearGradient(0, 0, 200, 200);
-                gradient.addColorStop(0, '#6B4C9A');
-                gradient.addColorStop(0.5, '#2D1B4E');
-                gradient.addColorStop(1, '#0B0D17');
-                ctx.beginPath();
-                ctx.arc(100, 100, 95, 0, Math.PI * 2);
-                ctx.fillStyle = gradient;
-                ctx.fill();
+                ctx.fillStyle = '#0B0D17';
+                ctx.fillRect(0, 0, 200, 200);
             }
             
-            // Outer ring background
+            // Background Ring (white, low opacity)
             ctx.beginPath();
             ctx.arc(100, 100, 75, 0, Math.PI * 2);
-            ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+            ctx.strokeStyle = 'rgba(255,255,255,0.1)';
             ctx.lineWidth = 8;
             ctx.stroke();
             
-            // Progress ring
+            // Progress Ring with gradient (75% complete)
             const ringGradient = ctx.createLinearGradient(25, 25, 175, 175);
             ringGradient.addColorStop(0, '#F4D03F');
             ringGradient.addColorStop(1, '#FF6B6B');
+            
             ctx.beginPath();
-            ctx.arc(100, 100, 75, -Math.PI/2, Math.PI * 1.25);
+            // Draw 75% of the circle (from -90 degrees, 270 degrees = 75% of 360)
+            ctx.arc(100, 100, 75, -Math.PI/2, -Math.PI/2 + Math.PI * 1.5);
             ctx.strokeStyle = ringGradient;
             ctx.lineWidth = 8;
             ctx.lineCap = 'round';
             ctx.stroke();
             
-            // Inner circle
+            // Inner Circle
             ctx.beginPath();
             ctx.arc(100, 100, 55, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(11, 13, 23, 0.6)';
+            ctx.fillStyle = 'rgba(11, 13, 23, 0.5)';
             ctx.fill();
             
-            // Play triangle
+            // Play Button (triangle)
             ctx.beginPath();
             ctx.moveTo(85, 75);
             ctx.lineTo(125, 100);
@@ -173,51 +176,46 @@
             ctx.fillStyle = '#F4D03F';
             ctx.fill();
             
-            // Stars
-            const stars = [
-                {x: 45, y: 45, r: 3, o: 0.6},
-                {x: 155, y: 60, r: 2, o: 0.4},
-                {x: 50, y: 150, r: 2, o: 0.5},
-                {x: 160, y: 145, r: 2.5, o: 0.3}
-            ];
-            stars.forEach(s => {
-                ctx.beginPath();
-                ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(255,255,255,${s.o})`;
-                ctx.fill();
-            });
-            
             ctx.restore();
         }
         
         function drawAdaptiveIcon(ctx, size) {
-            // For adaptive icon, we draw just the foreground centered
+            // For adaptive icon, we draw just the foreground (logo without background)
+            // Background color will be set separately in app.json
             const scale = size / 200;
             ctx.save();
             ctx.scale(scale, scale);
             
-            // Outer ring background
+            // Background Ring (white, low opacity)
             ctx.beginPath();
-            ctx.arc(100, 100, 65, 0, Math.PI * 2);
+            ctx.arc(100, 100, 75, 0, Math.PI * 2);
             ctx.strokeStyle = 'rgba(255,255,255,0.3)';
             ctx.lineWidth = 6;
             ctx.stroke();
             
-            // Progress ring
-            const ringGradient = ctx.createLinearGradient(35, 35, 165, 165);
+            // Progress Ring with gradient (75% complete)
+            const ringGradient = ctx.createLinearGradient(25, 25, 175, 175);
             ringGradient.addColorStop(0, '#F4D03F');
             ringGradient.addColorStop(1, '#FF6B6B');
+            
             ctx.beginPath();
-            ctx.arc(100, 100, 65, -Math.PI/2, Math.PI * 1.25);
+            // Draw 75% of the circle
+            ctx.arc(100, 100, 75, -Math.PI/2, -Math.PI/2 + Math.PI * 1.5);
             ctx.strokeStyle = ringGradient;
             ctx.lineWidth = 6;
             ctx.lineCap = 'round';
             ctx.stroke();
             
-            // Play triangle
+            // Inner Circle
+            ctx.beginPath();
+            ctx.arc(100, 100, 55, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(11, 13, 23, 0.6)';
+            ctx.fill();
+            
+            // Play Button (triangle)
             ctx.beginPath();
             ctx.moveTo(85, 75);
-            ctx.lineTo(120, 100);
+            ctx.lineTo(125, 100);
             ctx.lineTo(85, 125);
             ctx.closePath();
             ctx.fillStyle = '#F4D03F';
@@ -242,6 +240,56 @@
         const splashCtx = splashCanvas.getContext('2d');
         drawIcon(splashCtx, 200, false);
         
+        const faviconCanvas = document.getElementById('favicon');
+        const faviconCtx = faviconCanvas.getContext('2d');
+        drawFavicon(faviconCtx, 32);
+        
+        function drawFavicon(ctx, size) {
+            const scale = size / 200;
+            ctx.save();
+            ctx.scale(scale, scale);
+            
+            // Background
+            ctx.fillStyle = '#0B0D17';
+            ctx.fillRect(0, 0, 200, 200);
+            
+            // Background Ring (simplified for small size)
+            ctx.beginPath();
+            ctx.arc(100, 100, 75, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+            ctx.lineWidth = 8;
+            ctx.stroke();
+            
+            // Progress Ring with gradient (75% complete)
+            const ringGradient = ctx.createLinearGradient(25, 25, 175, 175);
+            ringGradient.addColorStop(0, '#F4D03F');
+            ringGradient.addColorStop(1, '#FF6B6B');
+            
+            ctx.beginPath();
+            ctx.arc(100, 100, 75, -Math.PI/2, -Math.PI/2 + Math.PI * 1.5);
+            ctx.strokeStyle = ringGradient;
+            ctx.lineWidth = 8;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+            
+            // Inner Circle
+            ctx.beginPath();
+            ctx.arc(100, 100, 55, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(11, 13, 23, 0.5)';
+            ctx.fill();
+            
+            // Play Button (triangle) - simplified
+            ctx.beginPath();
+            ctx.moveTo(85, 75);
+            ctx.lineTo(125, 100);
+            ctx.lineTo(85, 125);
+            ctx.closePath();
+            ctx.fillStyle = '#F4D03F';
+            ctx.fill();
+            
+            ctx.restore();
+        }
+        
         function downloadCanvas(canvas, filename) {
             const link = document.createElement('a');
             link.download = filename;
@@ -259,6 +307,10 @@
         
         function downloadSplash() {
             downloadCanvas(document.getElementById('splash'), 'splash-icon.png');
+        }
+        
+        function downloadFavicon() {
+            downloadCanvas(document.getElementById('favicon'), 'favicon.png');
         }
     </script>
 </body>
