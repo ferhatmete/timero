@@ -103,6 +103,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 8,
     flex: 1,
+    marginRight: 0,
   },
   modeButton: {
     paddingVertical: 10,
@@ -115,7 +116,7 @@ const styles = StyleSheet.create({
   },
   iconGroup: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 4,
   },
   iconButton: {
     width: 44,
