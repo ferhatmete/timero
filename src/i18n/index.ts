@@ -43,6 +43,38 @@ const resources = {
       notificationShortBreakCompleteBody: 'Ready to focus again?',
       notificationLongBreakComplete: 'Long break finished! 🌴',
       notificationLongBreakCompleteBody: 'Refreshed and ready to work!',
+      // Duration settings
+      durationSettings: 'Duration Settings',
+      focusDuration: 'Focus Duration',
+      shortBreakDuration: 'Short Break Duration',
+      longBreakDuration: 'Long Break Duration',
+      minutes: 'min',
+      // Tasks
+      tasks: 'Tasks',
+      addTask: 'Add Task',
+      taskTitle: 'Task title...',
+      estimatedPomodoros: 'Pomodoros',
+      activeTasks: 'Active Tasks',
+      completedTasks: 'Completed',
+      noTasks: 'No tasks yet. Add your first task!',
+      deleteTask: 'Delete Task',
+      deleteTaskConfirm: 'Are you sure you want to delete this task?',
+      cancel: 'Cancel',
+      delete: 'Delete',
+      save: 'Save',
+      // Sound settings
+      soundSettings: 'Sound Settings',
+      alarmSound: 'Alarm Sound',
+      vibration: 'Vibration',
+      soundDefault: 'Default',
+      soundBell: 'Bell',
+      soundChime: 'Chime',
+      soundDigital: 'Digital',
+      soundNone: 'None',
+      // Reports
+      thisWeek: 'This Week',
+      thisMonth: 'This Month',
+      weeklyAverage: 'Daily Average',
       themes: {
         space: 'Space',
         sea: 'Sea',
@@ -96,6 +128,38 @@ const resources = {
       notificationShortBreakCompleteBody: 'Tekrar odaklanmaya hazır mısın?',
       notificationLongBreakComplete: 'Uzun mola bitti! 🌴',
       notificationLongBreakCompleteBody: 'Yenilendin ve çalışmaya hazırsın!',
+      // Duration settings
+      durationSettings: 'Süre Ayarları',
+      focusDuration: 'Odak Süresi',
+      shortBreakDuration: 'Kısa Mola Süresi',
+      longBreakDuration: 'Uzun Mola Süresi',
+      minutes: 'dk',
+      // Tasks
+      tasks: 'Görevler',
+      addTask: 'Görev Ekle',
+      taskTitle: 'Görev başlığı...',
+      estimatedPomodoros: 'Pomodoro',
+      activeTasks: 'Aktif Görevler',
+      completedTasks: 'Tamamlanan',
+      noTasks: 'Henüz görev yok. İlk görevini ekle!',
+      deleteTask: 'Görevi Sil',
+      deleteTaskConfirm: 'Bu görevi silmek istediğinize emin misiniz?',
+      cancel: 'İptal',
+      delete: 'Sil',
+      save: 'Kaydet',
+      // Sound settings
+      soundSettings: 'Ses Ayarları',
+      alarmSound: 'Alarm Sesi',
+      vibration: 'Titreşim',
+      soundDefault: 'Varsayılan',
+      soundBell: 'Zil',
+      soundChime: 'Çan',
+      soundDigital: 'Dijital',
+      soundNone: 'Kapalı',
+      // Reports
+      thisWeek: 'Bu Hafta',
+      thisMonth: 'Bu Ay',
+      weeklyAverage: 'Günlük Ortalama',
       themes: {
         space: 'Uzay',
         sea: 'Deniz',
@@ -110,284 +174,13 @@ const resources = {
       }
     },
   },
-  de: {
-    translation: {
-      work: 'Fokus',
-      shortBreak: 'Kurze Pause',
-      longBreak: 'Lange Pause',
-      selectTheme: 'Thema Wählen',
-      selectLanguage: 'Sprache Wählen',
-      themes: {
-        space: 'Weltraum',
-        sea: 'Meer',
-        coast: 'Küste',
-        forest: 'Wald',
-        desert: 'Wüste',
-        city: 'Stadt',
-        sunset: 'Sonnenuntergang',
-        mountain: 'Berg',
-        polar: 'Polar',
-        night: 'Nacht',
-      }
-    },
-  },
-  es: {
-    translation: {
-      work: 'Enfoque',
-      shortBreak: 'Descanso Corto',
-      longBreak: 'Descanso Largo',
-      selectTheme: 'Seleccionar Tema',
-      selectLanguage: 'Seleccionar Idioma',
-      themes: {
-        space: 'Espacio',
-        sea: 'Mar',
-        coast: 'Costa',
-        forest: 'Bosque',
-        desert: 'Desierto',
-        city: 'Ciudad',
-        sunset: 'Atardecer',
-        mountain: 'Montaña',
-        polar: 'Polar',
-        night: 'Noche',
-      }
-    },
-  },
-  fr: {
-    translation: {
-      work: 'Focus',
-      shortBreak: 'Pause Courte',
-      longBreak: 'Pause Longue',
-      selectTheme: 'Choisir Thème',
-      selectLanguage: 'Choisir la langue',
-      themes: {
-        space: 'Espace',
-        sea: 'Mer',
-        coast: 'Côte',
-        forest: 'Forêt',
-        desert: 'Désert',
-        city: 'Ville',
-        sunset: 'Coucher de soleil',
-        mountain: 'Montagne',
-        polar: 'Polaire',
-        night: 'Nuit',
-      }
-    },
-  },
-  it: {
-    translation: {
-      work: 'Focus',
-      shortBreak: 'Pausa Breve',
-      longBreak: 'Pausa Lunga',
-      selectTheme: 'Seleziona Tema',
-      selectLanguage: 'Seleziona Lingua',
-      themes: {
-        space: 'Spazio',
-        sea: 'Mare',
-        coast: 'Costa',
-        forest: 'Foresta',
-        desert: 'Deserto',
-        city: 'Città',
-        sunset: 'Tramonto',
-        mountain: 'Montagna',
-        polar: 'Polare',
-        night: 'Notte',
-      }
-    },
-  },
-  pt: {
-    translation: {
-      work: 'Foco',
-      shortBreak: 'Pausa Curta',
-      longBreak: 'Pausa Longa',
-      selectTheme: 'Selecionar Tema',
-      selectLanguage: 'Selecionar Idioma',
-      themes: {
-        space: 'Espaço',
-        sea: 'Mar',
-        coast: 'Costa',
-        forest: 'Floresta',
-        desert: 'Deserto',
-        city: 'Cidade',
-        sunset: 'Pôr do Sol',
-        mountain: 'Montanha',
-        polar: 'Polar',
-        night: 'Noite',
-      }
-    },
-  },
-  ru: {
-    translation: {
-      work: 'Фокус',
-      shortBreak: 'Короткий перерыв',
-      longBreak: 'Длинный перерыв',
-      selectTheme: 'Выбрать тему',
-      selectLanguage: 'Выберите язык',
-      themes: {
-        space: 'Космос',
-        sea: 'Море',
-        coast: 'Побережье',
-        forest: 'Лес',
-        desert: 'Пустыня',
-        city: 'Город',
-        sunset: 'Закат',
-        mountain: 'Гора',
-        polar: 'Полярный',
-        night: 'Ночь',
-      }
-    },
-  },
-  ja: {
-    translation: {
-      work: '集中',
-      shortBreak: '短い休憩',
-      longBreak: '長い休憩',
-      selectTheme: 'テーマを選択',
-      selectLanguage: '言語を選択',
-      themes: {
-        space: '宇宙',
-        sea: '海',
-        coast: '海岸',
-        forest: '森',
-        desert: '砂漠',
-        city: '都市',
-        sunset: '夕日',
-        mountain: '山',
-        polar: '極地',
-        night: '夜',
-      }
-    },
-  },
-  zh: {
-    translation: {
-      work: '专注',
-      shortBreak: '短休息',
-      longBreak: '长休息',
-      selectTheme: '选择主题',
-      selectLanguage: '选择语言',
-      themes: {
-        space: '太空',
-        sea: '海洋',
-        coast: '海岸',
-        forest: '森林',
-        desert: '沙漠',
-        city: '城市',
-        sunset: '日落',
-        mountain: '山脉',
-        polar: '极地',
-        night: '夜晚',
-      }
-    },
-  },
-  ko: {
-    translation: {
-      work: '집중',
-      shortBreak: '짧은 휴식',
-      longBreak: '긴 휴식',
-      selectTheme: '테마 선택',
-      selectLanguage: '언어 선택',
-      themes: {
-        space: '우주',
-        sea: '바다',
-        coast: '해안',
-        forest: '숲',
-        desert: '사막',
-        city: '도시',
-        sunset: '일몰',
-        mountain: '산',
-        polar: '극지',
-        night: '밤',
-      }
-    },
-  },
-  ar: {
-    translation: {
-      work: 'التركيز',
-      shortBreak: 'استراحة قصيرة',
-      longBreak: 'استراحة طويلة',
-      selectTheme: 'اختر الموضوع',
-      selectLanguage: 'اختار اللغة',
-      themes: {
-        space: 'الفضاء',
-        sea: 'البحر',
-        coast: 'الساحل',
-        forest: 'الغابة',
-        desert: 'الصحراء',
-        city: 'المدينة',
-        sunset: 'الغروب',
-        mountain: 'الجبل',
-        polar: 'القطبي',
-        night: 'الليل',
-      }
-    },
-  },
-  hi: {
-    translation: {
-      work: 'ध्यान',
-      shortBreak: 'छोटा ब्रेक',
-      longBreak: 'लंबा ब्रेक',
-      selectTheme: 'थीम चुनें',
-      selectLanguage: 'भाषा चुने',
-      themes: {
-        space: 'अंतरिक्ष',
-        sea: 'समुद्र',
-        coast: 'तट',
-        forest: 'वन',
-        desert: 'रेगिस्तान',
-        city: 'शहर',
-        sunset: 'सूर्यास्त',
-        mountain: 'पहाड़',
-        polar: 'ध्रुवीय',
-        night: 'रात',
-      }
-    },
-  },
-  nl: {
-    translation: {
-      work: 'Focus',
-      shortBreak: 'Korte Pauze',
-      longBreak: 'Lange Pauze',
-      selectTheme: 'Kies Thema',
-      selectLanguage: 'Kies Taal',
-      themes: {
-        space: 'Ruimte',
-        sea: 'Zee',
-        coast: 'Kust',
-        forest: 'Bos',
-        desert: 'Woestijn',
-        city: 'Stad',
-        sunset: 'Zonsondergang',
-        mountain: 'Berg',
-        polar: 'Polair',
-        night: 'Nacht',
-      }
-    },
-  },
-  sv: {
-    translation: {
-      work: 'Fokus',
-      shortBreak: 'Kort Rast',
-      longBreak: 'Lång Rast',
-      selectTheme: 'Välj Tema',
-      selectLanguage: 'Välj Språk',
-      themes: {
-        space: 'Rymd',
-        sea: 'Hav',
-        coast: 'Kust',
-        forest: 'Skog',
-        desert: 'Öken',
-        city: 'Stad',
-        sunset: 'Solnedgång',
-        mountain: 'Berg',
-        polar: 'Polär',
-        night: 'Natt',
-      }
-    },
-  },
 };
 
 const getLocale = () => {
-    const locales = Localization.getLocales();
-    return locales[0]?.languageCode || 'en';
+  const locales = Localization.getLocales();
+  const languageCode = locales[0]?.languageCode || 'en';
+  // Only support Turkish and English - if phone is Turkish, use Turkish, otherwise English
+  return languageCode === 'tr' ? 'tr' : 'en';
 }
 
 i18n
@@ -402,4 +195,3 @@ i18n
   });
 
 export default i18n;
-

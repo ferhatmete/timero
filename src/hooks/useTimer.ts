@@ -8,35 +8,52 @@ import { useTranslation } from 'react-i18next';
 
 export type TimerMode = 'work' | 'shortBreak' | 'longBreak';
 
-const TIMER_MODES: Record<TimerMode, number> = {
-  work: 25 * 60,
-  shortBreak: 5 * 60,
-  longBreak: 15 * 60,
-};
-
 // Configure notification handler
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
   }),
 });
 
 export const useTimer = () => {
   useKeepAwake();
   const { t } = useTranslation();
-  
+
+  const { stats, prefs, toggleAutoStart, setNextBreakType, setWorkDuration, setShortBreakDuration, setLongBreakDuration, setAlarmSound, setAlarmVibrate, recordSession } = useStats();
+
+  // Get duration in seconds based on mode and user preferences
+  const getModeDuration = useCallback((mode: TimerMode): number => {
+    switch (mode) {
+      case 'work':
+        return prefs.workDuration * 60;
+      case 'shortBreak':
+        return prefs.shortBreakDuration * 60;
+      case 'longBreak':
+        return prefs.longBreakDuration * 60;
+      default:
+        return 25 * 60;
+    }
+  }, [prefs.workDuration, prefs.shortBreakDuration, prefs.longBreakDuration]);
+
   const [mode, setMode] = useState<TimerMode>('work');
-  const [timeLeft, setTimeLeft] = useState(TIMER_MODES.work);
+  const [timeLeft, setTimeLeft] = useState(prefs.workDuration * 60);
   const [isActive, setIsActive] = useState(false);
   const [pomodorosCompleted, setPomodorosCompleted] = useState(0);
-  
-  const { stats, prefs, toggleAutoStart, setNextBreakType, recordSession } = useStats();
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number | null>(null);
   const expectedTimeRef = useRef<number>(0);
+
+  // Update timeLeft when prefs change and timer is not active
+  useEffect(() => {
+    if (!isActive) {
+      setTimeLeft(getModeDuration(mode));
+    }
+  }, [prefs.workDuration, prefs.shortBreakDuration, prefs.longBreakDuration, mode, isActive, getModeDuration]);
 
   // Request notification permissions on mount
   useEffect(() => {
@@ -87,7 +104,7 @@ export const useTimer = () => {
     try {
       // Haptic feedback
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      
+
       // Multiple haptic pulses for attention
       for (let i = 0; i < 4; i++) {
         setTimeout(async () => {
@@ -123,7 +140,7 @@ export const useTimer = () => {
         startTimeRef.current = Date.now();
         expectedTimeRef.current = timeLeft;
       }
-      
+
       timerRef.current = setInterval(() => {
         setTimeLeft((prev) => {
           if (prev <= 1) {
@@ -145,10 +162,10 @@ export const useTimer = () => {
     setIsActive(false);
     startTimeRef.current = null;
     if (timerRef.current) clearInterval(timerRef.current);
-    
+
     // Store current mode before changing
     const completedMode = mode;
-    
+
     // Play alarm (sound + haptic + notification) for completed mode
     await playAlarm(completedMode);
 
@@ -157,17 +174,17 @@ export const useTimer = () => {
     if (mode === 'work') {
       const newCompleted = pomodorosCompleted + 1;
       setPomodorosCompleted(newCompleted);
-      
-      await recordSession(TIMER_MODES.work / 60);
+
+      await recordSession(prefs.workDuration);
 
       // Use user preference for break type
       const breakType = prefs.nextBreakType || 'short';
-      
+
       if (newCompleted % 4 === 0) {
         // After 4 pomodoros, always take a long break
         nextMode = 'longBreak';
         setMode('longBreak');
-        setTimeLeft(TIMER_MODES.longBreak);
+        setTimeLeft(getModeDuration('longBreak'));
         Alert.alert(
           t('congratulations') || "Congratulations!",
           t('pomodoroSetComplete') || "You completed a Pomodoro set! 🎉"
@@ -176,22 +193,22 @@ export const useTimer = () => {
         // Use user's preferred break type
         nextMode = breakType === 'long' ? 'longBreak' : 'shortBreak';
         setMode(nextMode);
-        setTimeLeft(TIMER_MODES[nextMode]);
+        setTimeLeft(getModeDuration(nextMode));
       }
     } else {
       nextMode = 'work';
       setMode('work');
-      setTimeLeft(TIMER_MODES.work);
+      setTimeLeft(getModeDuration('work'));
     }
 
     if (prefs.autoStart) {
       setTimeout(() => {
         setIsActive(true);
         startTimeRef.current = Date.now();
-        expectedTimeRef.current = TIMER_MODES[nextMode];
+        expectedTimeRef.current = getModeDuration(nextMode);
       }, 1000);
     }
-  }, [mode, pomodorosCompleted, prefs.autoStart, prefs.nextBreakType, playAlarm, recordSession, t]);
+  }, [mode, pomodorosCompleted, prefs.autoStart, prefs.nextBreakType, prefs.workDuration, playAlarm, recordSession, t, getModeDuration]);
 
   const toggleTimer = useCallback(() => {
     if (!isActive) {
@@ -206,32 +223,32 @@ export const useTimer = () => {
   const resetTimer = useCallback(() => {
     setIsActive(false);
     startTimeRef.current = null;
-    setTimeLeft(TIMER_MODES[mode]);
-  }, [mode]);
+    setTimeLeft(getModeDuration(mode));
+  }, [mode, getModeDuration]);
 
   const fullReset = useCallback(() => {
     setIsActive(false);
     startTimeRef.current = null;
     setMode('work');
-    setTimeLeft(TIMER_MODES.work);
+    setTimeLeft(getModeDuration('work'));
     setPomodorosCompleted(0);
-  }, []);
+  }, [getModeDuration]);
 
   const switchMode = useCallback((newMode: TimerMode) => {
     setMode(newMode);
     setIsActive(false);
     startTimeRef.current = null;
-    setTimeLeft(TIMER_MODES[newMode]);
-  }, []);
+    setTimeLeft(getModeDuration(newMode));
+  }, [getModeDuration]);
 
   const skipBreak = useCallback(() => {
     if (mode === 'shortBreak' || mode === 'longBreak') {
       setIsActive(false);
       startTimeRef.current = null;
       setMode('work');
-      setTimeLeft(TIMER_MODES.work);
+      setTimeLeft(getModeDuration('work'));
     }
-  }, [mode]);
+  }, [mode, getModeDuration]);
 
   const formatTime = useCallback((seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -250,10 +267,15 @@ export const useTimer = () => {
     switchMode,
     skipBreak,
     formatTime,
-    progress: timeLeft / TIMER_MODES[mode],
+    progress: timeLeft / getModeDuration(mode),
     stats,
     prefs,
     toggleAutoStart,
-    setNextBreakType
+    setNextBreakType,
+    setWorkDuration,
+    setShortBreakDuration,
+    setLongBreakDuration,
+    setAlarmSound,
+    setAlarmVibrate
   };
 };

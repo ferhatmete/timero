@@ -2,8 +2,7 @@ import React from 'react';
 import { View, Text, Modal, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
-import { X, TrendingUp, Clock, Calendar, Zap, Award, Target, Flame } from 'lucide-react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { X, TrendingUp, Clock, Calendar, Award, Target, Flame } from 'lucide-react-native';
 import { StatsData } from '../hooks/useStats';
 
 interface StatsModalProps {
@@ -34,6 +33,55 @@ export const StatsModal: React.FC<StatsModalProps> = ({ visible, onClose, stats 
     (acc, day) => acc + day.totalMinutes, 0
   );
 
+  // Calculate weekly stats
+  const getWeeklyStats = () => {
+    const now = new Date();
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay()); // Sunday
+    startOfWeek.setHours(0, 0, 0, 0);
+    
+    let sessions = 0;
+    let minutes = 0;
+    let daysWithSessions = 0;
+    
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(startOfWeek);
+      date.setDate(startOfWeek.getDate() + i);
+      const key = date.toISOString().split('T')[0];
+      const dayStats = stats.daily[key];
+      if (dayStats) {
+        sessions += dayStats.count;
+        minutes += dayStats.totalMinutes;
+        if (dayStats.count > 0) daysWithSessions++;
+      }
+    }
+    
+    return { sessions, minutes, daysWithSessions };
+  };
+
+  // Calculate monthly stats
+  const getMonthlyStats = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    
+    let sessions = 0;
+    let minutes = 0;
+    
+    Object.entries(stats.daily).forEach(([dateStr, dayStats]) => {
+      const date = new Date(dateStr);
+      if (date.getFullYear() === year && date.getMonth() === month) {
+        sessions += dayStats.count;
+        minutes += dayStats.totalMinutes;
+      }
+    });
+    
+    return { sessions, minutes };
+  };
+
+  const weeklyStats = getWeeklyStats();
+  const monthlyStats = getMonthlyStats();
+
   const formatHours = (minutes: number) => {
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
@@ -62,152 +110,140 @@ export const StatsModal: React.FC<StatsModalProps> = ({ visible, onClose, stats 
           </View>
           
           <ScrollView contentContainerStyle={styles.contentList} showsVerticalScrollIndicator={false}>
-            {/* Today Section */}
-            <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
-              {t('today') || 'Today'}
-            </Text>
-            <View style={styles.grid}>
-              {/* Daily Count */}
-              <View style={[styles.statCard, { backgroundColor: 'rgba(255,255,255,0.05)' }]}>
-                <View style={[styles.iconCircle, { backgroundColor: 'rgba(244, 208, 63, 0.15)' }]}>
-                  <Calendar size={20} color="#F4D03F" />
-                </View>
-                <Text style={[styles.statValue, { color: colors.text }]}>{todayStats.count}</Text>
-                <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
-                  {t('todaySessions') || 'Sessions'}
+            {/* Today & Streak Row - Compact */}
+            <View style={styles.compactRow}>
+              {/* Today Sessions */}
+              <View style={[styles.compactCard, { backgroundColor: 'rgba(255,255,255,0.05)' }]}>
+                <Calendar size={16} color="#F4D03F" />
+                <Text style={[styles.compactValue, { color: colors.text }]}>{todayStats.count}</Text>
+                <Text style={[styles.compactLabel, { color: colors.textSecondary }]}>
+                  {t('today') || 'Today'}
                 </Text>
               </View>
 
-              {/* Total Minutes Today */}
-              <View style={[styles.statCard, { backgroundColor: 'rgba(255,255,255,0.05)' }]}>
-                <View style={[styles.iconCircle, { backgroundColor: 'rgba(78, 205, 196, 0.15)' }]}>
-                  <Clock size={20} color="#4ECDC4" />
-                </View>
-                <Text style={[styles.statValue, { color: colors.text }]}>
+              {/* Today Time */}
+              <View style={[styles.compactCard, { backgroundColor: 'rgba(255,255,255,0.05)' }]}>
+                <Clock size={16} color="#4ECDC4" />
+                <Text style={[styles.compactValue, { color: colors.text }]}>
                   {formatHours(todayStats.totalMinutes)}
                 </Text>
-                <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
-                  {t('todayMinutes') || 'Focus Time'}
+                <Text style={[styles.compactLabel, { color: colors.textSecondary }]}>
+                  {t('todayMinutes') || 'Focus'}
+                </Text>
+              </View>
+
+              {/* Current Streak */}
+              <View style={[styles.compactCard, { backgroundColor: 'rgba(255, 107, 107, 0.1)' }]}>
+                <Flame size={16} color="#FF6B6B" />
+                <Text style={[styles.compactValue, { color: colors.text }]}>{stats.streak.current}</Text>
+                <Text style={[styles.compactLabel, { color: colors.textSecondary }]}>
+                  {t('currentStreak') || 'Streak'}
+                </Text>
+              </View>
+
+              {/* Max Streak */}
+              <View style={[styles.compactCard, { backgroundColor: 'rgba(244, 208, 63, 0.1)' }]}>
+                <Award size={16} color="#F4D03F" />
+                <Text style={[styles.compactValue, { color: colors.text }]}>{stats.streak.max}</Text>
+                <Text style={[styles.compactLabel, { color: colors.textSecondary }]}>
+                  {t('maxStreak') || 'Best'}
                 </Text>
               </View>
             </View>
 
-            {/* Streaks Section */}
-            <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: 20 }]}>
-              {t('streaks') || 'Streaks'}
+            {/* Weekly Stats */}
+            <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: 16 }]}>
+              {t('thisWeek') || 'This Week'}
             </Text>
-            <View style={styles.grid}>
-              {/* Current Streak */}
-              <LinearGradient
-                colors={['rgba(255, 107, 107, 0.2)', 'rgba(255, 107, 107, 0.05)']}
-                style={styles.streakCard}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
-                <View style={[styles.iconCircle, { backgroundColor: 'rgba(255, 107, 107, 0.2)' }]}>
-                  <Flame size={20} color="#FF6B6B" />
+            <View style={styles.reportCard}>
+              <View style={styles.reportRow}>
+                <View style={styles.reportItem}>
+                  <Target size={18} color="#9B6FD4" />
+                  <View style={styles.reportText}>
+                    <Text style={[styles.reportValue, { color: colors.text }]}>{weeklyStats.sessions}</Text>
+                    <Text style={[styles.reportLabel, { color: colors.textSecondary }]}>
+                      {t('todaySessions') || 'Sessions'}
+                    </Text>
+                  </View>
                 </View>
-                <Text style={[styles.statValue, { color: colors.text }]}>{stats.streak.current}</Text>
-                <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
-                  {t('currentStreak') || 'Current'}
-                </Text>
-                <Text style={[styles.streakUnit, { color: colors.textSecondary }]}>
-                  {stats.streak.current === 1 ? (t('day') || 'day') : (t('days') || 'days')}
-                </Text>
-              </LinearGradient>
-
-              {/* Max Streak */}
-              <LinearGradient
-                colors={['rgba(244, 208, 63, 0.2)', 'rgba(244, 208, 63, 0.05)']}
-                style={styles.streakCard}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
-                <View style={[styles.iconCircle, { backgroundColor: 'rgba(244, 208, 63, 0.2)' }]}>
-                  <Award size={20} color="#F4D03F" />
+                <View style={styles.reportItem}>
+                  <Clock size={18} color="#4ECDC4" />
+                  <View style={styles.reportText}>
+                    <Text style={[styles.reportValue, { color: colors.text }]}>{formatHours(weeklyStats.minutes)}</Text>
+                    <Text style={[styles.reportLabel, { color: colors.textSecondary }]}>
+                      {t('totalFocusTime') || 'Focus Time'}
+                    </Text>
+                  </View>
                 </View>
-                <Text style={[styles.statValue, { color: colors.text }]}>{stats.streak.max}</Text>
-                <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
-                  {t('maxStreak') || 'Best'}
-                </Text>
-                <Text style={[styles.streakUnit, { color: colors.textSecondary }]}>
-                  {stats.streak.max === 1 ? (t('day') || 'day') : (t('days') || 'days')}
-                </Text>
-              </LinearGradient>
+              </View>
             </View>
 
-            {/* All Time Section */}
-            <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: 20 }]}>
+            {/* Monthly Stats */}
+            <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: 16 }]}>
+              {t('thisMonth') || 'This Month'}
+            </Text>
+            <View style={styles.reportCard}>
+              <View style={styles.reportRow}>
+                <View style={styles.reportItem}>
+                  <Target size={18} color="#9B6FD4" />
+                  <View style={styles.reportText}>
+                    <Text style={[styles.reportValue, { color: colors.text }]}>{monthlyStats.sessions}</Text>
+                    <Text style={[styles.reportLabel, { color: colors.textSecondary }]}>
+                      {t('todaySessions') || 'Sessions'}
+                    </Text>
+                  </View>
+                </View>
+                <View style={styles.reportItem}>
+                  <Clock size={18} color="#4ECDC4" />
+                  <View style={styles.reportText}>
+                    <Text style={[styles.reportValue, { color: colors.text }]}>{formatHours(monthlyStats.minutes)}</Text>
+                    <Text style={[styles.reportLabel, { color: colors.textSecondary }]}>
+                      {t('totalFocusTime') || 'Focus Time'}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+
+            {/* All Time Stats - Compact */}
+            <Text style={[styles.sectionTitle, { color: colors.textSecondary, marginTop: 16 }]}>
               {t('allTime') || 'All Time'}
             </Text>
-            <View style={styles.allTimeContainer}>
-              {/* Total Sessions All Time */}
-              <LinearGradient
-                colors={['rgba(107, 76, 154, 0.3)', 'rgba(45, 27, 78, 0.2)']}
-                style={styles.allTimeCard}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
-                <View style={styles.allTimeRow}>
-                  <View style={[styles.iconCircleLarge, { backgroundColor: 'rgba(107, 76, 154, 0.3)' }]}>
-                    <Target size={28} color="#9B6FD4" />
-                  </View>
-                  <View style={styles.allTimeInfo}>
-                    <Text style={[styles.allTimeValue, { color: colors.text }]}>
-                      {stats.totalSessions}
-                    </Text>
-                    <Text style={[styles.allTimeLabel, { color: colors.textSecondary }]}>
-                      {t('totalSessionsAllTime') || 'Total Sessions'}
+            <View style={styles.reportCard}>
+              <View style={styles.reportRow}>
+                <View style={styles.reportItem}>
+                  <Target size={18} color="#9B6FD4" />
+                  <View style={styles.reportText}>
+                    <Text style={[styles.reportValue, { color: colors.text }]}>{stats.totalSessions}</Text>
+                    <Text style={[styles.reportLabel, { color: colors.textSecondary }]}>
+                      {t('totalSessionsAllTime') || 'Sessions'}
                     </Text>
                   </View>
                 </View>
-              </LinearGradient>
-
-              {/* Total Focus Time All Time */}
-              <LinearGradient
-                colors={['rgba(78, 205, 196, 0.2)', 'rgba(78, 205, 196, 0.05)']}
-                style={styles.allTimeCard}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
-                <View style={styles.allTimeRow}>
-                  <View style={[styles.iconCircleLarge, { backgroundColor: 'rgba(78, 205, 196, 0.2)' }]}>
-                    <Clock size={28} color="#4ECDC4" />
-                  </View>
-                  <View style={styles.allTimeInfo}>
-                    <Text style={[styles.allTimeValue, { color: colors.text }]}>
-                      {formatHours(totalMinutesAllTime)}
-                    </Text>
-                    <Text style={[styles.allTimeLabel, { color: colors.textSecondary }]}>
-                      {t('totalFocusTime') || 'Total Focus Time'}
+                <View style={styles.reportItem}>
+                  <Clock size={18} color="#4ECDC4" />
+                  <View style={styles.reportText}>
+                    <Text style={[styles.reportValue, { color: colors.text }]}>{formatHours(totalMinutesAllTime)}</Text>
+                    <Text style={[styles.reportLabel, { color: colors.textSecondary }]}>
+                      {t('totalFocusTime') || 'Focus Time'}
                     </Text>
                   </View>
                 </View>
-              </LinearGradient>
-
-              {/* Best Hour */}
-              <LinearGradient
-                colors={['rgba(255, 193, 7, 0.2)', 'rgba(255, 193, 7, 0.05)']}
-                style={styles.allTimeCard}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
-                <View style={styles.allTimeRow}>
-                  <View style={[styles.iconCircleLarge, { backgroundColor: 'rgba(255, 193, 7, 0.2)' }]}>
-                    <TrendingUp size={28} color="#FFC107" />
-                  </View>
-                  <View style={styles.allTimeInfo}>
-                    <Text style={[styles.allTimeValue, { color: colors.text }]}>
+              </View>
+              <View style={[styles.reportRow, { marginTop: 12 }]}>
+                <View style={styles.reportItem}>
+                  <TrendingUp size={18} color="#FFC107" />
+                  <View style={styles.reportText}>
+                    <Text style={[styles.reportValue, { color: colors.text }]}>
                       {maxHour >= 0 ? `${maxHour.toString().padStart(2, '0')}:00` : '--:--'}
                     </Text>
-                    <Text style={[styles.allTimeLabel, { color: colors.textSecondary }]}>
-                      {t('bestHour') || 'Most Productive Hour'}
+                    <Text style={[styles.reportLabel, { color: colors.textSecondary }]}>
+                      {t('bestHour') || 'Best Hour'}
                     </Text>
                   </View>
                 </View>
-              </LinearGradient>
+              </View>
             </View>
-
           </ScrollView>
         </View>
       </View>
@@ -224,14 +260,11 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     width: '90%',
-    maxHeight: '85%',
+    maxHeight: '80%',
     borderRadius: 24,
     padding: 20,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 10,
-    },
+    shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.4,
     shadowRadius: 20,
     elevation: 10,
@@ -240,10 +273,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 16,
   },
   title: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: '700',
     letterSpacing: 0.5,
   },
@@ -256,82 +289,56 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
   },
   sectionTitle: {
-    fontSize: 13,
+    fontSize: 11,
     fontWeight: '600',
     textTransform: 'uppercase',
     letterSpacing: 1.5,
-    marginBottom: 12,
+    marginBottom: 10,
   },
-  grid: {
+  // Compact 4-column row
+  compactRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 12,
+    gap: 8,
   },
-  statCard: {
+  compactCard: {
     flex: 1,
-    padding: 16,
-    borderRadius: 16,
+    padding: 12,
+    borderRadius: 14,
     alignItems: 'center',
   },
-  streakCard: {
-    flex: 1,
-    padding: 16,
-    borderRadius: 16,
-    alignItems: 'center',
-  },
-  iconCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  iconCircleLarge: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  statValue: {
-    fontSize: 28,
+  compactValue: {
+    fontSize: 20,
     fontWeight: '700',
-    marginBottom: 4,
+    marginTop: 6,
   },
-  statLabel: {
-    fontSize: 12,
-    textAlign: 'center',
-    fontWeight: '500',
-  },
-  streakUnit: {
+  compactLabel: {
     fontSize: 10,
     marginTop: 2,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
+    textAlign: 'center',
   },
-  allTimeContainer: {
-    gap: 10,
+  // Report card styles
+  reportCard: {
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 14,
+    padding: 14,
   },
-  allTimeCard: {
-    padding: 16,
-    borderRadius: 16,
+  reportRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
   },
-  allTimeRow: {
+  reportItem: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  allTimeInfo: {
-    marginLeft: 16,
     flex: 1,
   },
-  allTimeValue: {
-    fontSize: 24,
-    fontWeight: '700',
-    marginBottom: 2,
+  reportText: {
+    marginLeft: 10,
   },
-  allTimeLabel: {
-    fontSize: 13,
-    fontWeight: '500',
+  reportValue: {
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  reportLabel: {
+    fontSize: 11,
   },
 });

@@ -18,7 +18,7 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.ferhatmete.timero",
+      "bundleIdentifier": "com.fmsoftware.timero",
       "buildNumber": "1",
       "infoPlist": {
         "UIBackgroundModes": [
@@ -32,7 +32,7 @@
         "backgroundColor": "#0B0D17"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.ferhatmete.timero",
+      "package": "com.fmsoftware.timero",
       "versionCode": 1,
       "permissions": [
         "VIBRATE"

@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const STATS_STORAGE_KEY = '@timero_stats';
 const PREFS_STORAGE_KEY = '@timero_prefs';
 const PREFS_VERSION_KEY = '@timero_prefs_version';
-const CURRENT_PREFS_VERSION = 2; // Increment this to reset prefs to new defaults
+const CURRENT_PREFS_VERSION = 3; // Increment for new duration fields
 
 export interface DailyStats {
   date: string;
@@ -24,10 +24,18 @@ export interface StatsData {
 }
 
 export type NextBreakType = 'short' | 'long';
+export type AlarmSound = 'default' | 'bell' | 'chime' | 'digital' | 'none';
 
 export interface UserPrefs {
   autoStart: boolean;
   nextBreakType: NextBreakType;
+  // Customizable durations (in minutes)
+  workDuration: number;
+  shortBreakDuration: number;
+  longBreakDuration: number;
+  // Sound settings
+  alarmSound: AlarmSound;
+  alarmVibrate: boolean;
 }
 
 const INITIAL_STATS: StatsData = {
@@ -40,6 +48,11 @@ const INITIAL_STATS: StatsData = {
 const INITIAL_PREFS: UserPrefs = {
   autoStart: true,
   nextBreakType: 'short',
+  workDuration: 25,
+  shortBreakDuration: 5,
+  longBreakDuration: 15,
+  alarmSound: 'default',
+  alarmVibrate: true,
 };
 
 export const useStats = () => {
@@ -59,9 +72,9 @@ export const useStats = () => {
       ]);
 
       if (statsStr) setStats(JSON.parse(statsStr));
-      
+
       const savedVersion = versionStr ? parseInt(versionStr, 10) : 0;
-      
+
       // If prefs version is outdated, reset to new defaults
       if (savedVersion < CURRENT_PREFS_VERSION) {
         setPrefs(INITIAL_PREFS);
@@ -86,8 +99,7 @@ export const useStats = () => {
     }
   };
 
-  const toggleAutoStart = async () => {
-    const newPrefs = { ...prefs, autoStart: !prefs.autoStart };
+  const savePrefs = async (newPrefs: UserPrefs) => {
     setPrefs(newPrefs);
     try {
       await AsyncStorage.setItem(PREFS_STORAGE_KEY, JSON.stringify(newPrefs));
@@ -96,14 +108,39 @@ export const useStats = () => {
     }
   };
 
+  const toggleAutoStart = async () => {
+    const newPrefs = { ...prefs, autoStart: !prefs.autoStart };
+    await savePrefs(newPrefs);
+  };
+
   const setNextBreakType = async (type: NextBreakType) => {
     const newPrefs = { ...prefs, nextBreakType: type };
-    setPrefs(newPrefs);
-    try {
-      await AsyncStorage.setItem(PREFS_STORAGE_KEY, JSON.stringify(newPrefs));
-    } catch (error) {
-      console.error('Failed to save prefs:', error);
-    }
+    await savePrefs(newPrefs);
+  };
+
+  const setWorkDuration = async (minutes: number) => {
+    const newPrefs = { ...prefs, workDuration: minutes };
+    await savePrefs(newPrefs);
+  };
+
+  const setShortBreakDuration = async (minutes: number) => {
+    const newPrefs = { ...prefs, shortBreakDuration: minutes };
+    await savePrefs(newPrefs);
+  };
+
+  const setLongBreakDuration = async (minutes: number) => {
+    const newPrefs = { ...prefs, longBreakDuration: minutes };
+    await savePrefs(newPrefs);
+  };
+
+  const setAlarmSound = async (sound: AlarmSound) => {
+    const newPrefs = { ...prefs, alarmSound: sound };
+    await savePrefs(newPrefs);
+  };
+
+  const setAlarmVibrate = async (vibrate: boolean) => {
+    const newPrefs = { ...prefs, alarmVibrate: vibrate };
+    await savePrefs(newPrefs);
   };
 
   const recordSession = async (durationMinutes: number) => {
@@ -128,27 +165,24 @@ export const useStats = () => {
     if (lastDate) {
       const last = new Date(lastDate);
       const diffTime = Math.abs(now.getTime() - last.getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-      
-      // If same day, streak continues (already counted)
-      // If next day (diffDays === 1 check is rough but okay for simple MVP)
-      // Actually let's just check if it's the immediate next day string
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
       const yesterday = new Date(now);
       yesterday.setDate(yesterday.getDate() - 1);
       const yesterdayKey = yesterday.toISOString().split('T')[0];
 
       if (todayKey === lastDate) {
-         // Same day, streak doesn't increase, but maintained
+        // Same day, streak doesn't increase, but maintained
       } else if (lastDate === yesterdayKey) {
-         newStats.streak.current += 1;
+        newStats.streak.current += 1;
       } else {
-         // Broken streak
-         newStats.streak.current = 1;
+        // Broken streak
+        newStats.streak.current = 1;
       }
     } else {
       newStats.streak.current = 1;
     }
-    
+
     newStats.streak.lastDate = todayKey;
     if (newStats.streak.current > newStats.streak.max) {
       newStats.streak.max = newStats.streak.current;
@@ -165,9 +199,11 @@ export const useStats = () => {
     prefs,
     toggleAutoStart,
     setNextBreakType,
+    setWorkDuration,
+    setShortBreakDuration,
+    setLongBreakDuration,
+    setAlarmSound,
+    setAlarmVibrate,
     recordSession,
   };
 };
-
-
-

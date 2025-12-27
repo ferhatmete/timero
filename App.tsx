@@ -13,7 +13,9 @@ import { ModeSelector } from './src/components/ModeSelector';
 import { ThemeSelector } from './src/components/ThemeSelector';
 import { SettingsModal } from './src/components/SettingsModal';
 import { StatsModal } from './src/components/StatsModal';
+import { TasksModal } from './src/components/TasksModal';
 import { useTimer } from './src/hooks/useTimer';
+import { useTasks } from './src/hooks/useTasks';
 import './src/i18n';
 
 // Prevent auto-hide of native splash
@@ -36,11 +38,28 @@ const MainScreen = () => {
     stats, 
     prefs, 
     toggleAutoStart,
-    setNextBreakType
+    setNextBreakType,
+    setWorkDuration,
+    setShortBreakDuration,
+    setLongBreakDuration,
+    setAlarmSound,
+    setAlarmVibrate
   } = useTimer();
+
+  const {
+    tasks,
+    activeTaskId,
+    activeTask,
+    addTask,
+    deleteTask,
+    setActiveTask,
+    incrementPomodoro,
+    completeTask,
+  } = useTasks();
   
   const [isSettingsVisible, setIsSettingsVisible] = useState(false);
   const [isStatsVisible, setIsStatsVisible] = useState(false);
+  const [isTasksVisible, setIsTasksVisible] = useState(false);
 
   const statusBarStyle = colors.background.startsWith('#0') || 
                          colors.background.startsWith('#1') || 
@@ -59,6 +78,8 @@ const MainScreen = () => {
             onSelectMode={switchMode} 
             onSettingsPress={() => setIsSettingsVisible(true)}
             onStatsPress={() => setIsStatsVisible(true)}
+            onTasksPress={() => setIsTasksVisible(true)}
+            activeTask={activeTask}
           />
           
           <View style={styles.timerContainer}>
@@ -91,12 +112,33 @@ const MainScreen = () => {
           onToggleAutoStart={toggleAutoStart}
           nextBreakType={prefs.nextBreakType || 'short'}
           onChangeNextBreakType={setNextBreakType}
+          workDuration={prefs.workDuration}
+          shortBreakDuration={prefs.shortBreakDuration}
+          longBreakDuration={prefs.longBreakDuration}
+          onChangeWorkDuration={setWorkDuration}
+          onChangeShortBreakDuration={setShortBreakDuration}
+          onChangeLongBreakDuration={setLongBreakDuration}
+          alarmSound={prefs.alarmSound}
+          alarmVibrate={prefs.alarmVibrate}
+          onChangeAlarmSound={setAlarmSound}
+          onChangeAlarmVibrate={setAlarmVibrate}
         />
 
         <StatsModal
           visible={isStatsVisible}
           onClose={() => setIsStatsVisible(false)}
           stats={stats}
+        />
+
+        <TasksModal
+          visible={isTasksVisible}
+          onClose={() => setIsTasksVisible(false)}
+          tasks={tasks}
+          activeTaskId={activeTaskId}
+          onAddTask={addTask}
+          onDeleteTask={deleteTask}
+          onSetActiveTask={setActiveTask}
+          onCompleteTask={completeTask}
         />
       </SafeAreaView>
     </View>
