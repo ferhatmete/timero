@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { X, Check, Minus, Plus, Clock, Volume2 } from 'lucide-react-native';
 import { NextBreakType, AlarmSound } from '../hooks/useStats';
+import Constants from 'expo-constants';
 
 interface SettingsModalProps {
   visible: boolean;
@@ -309,6 +310,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 );
               })}
             </View>
+
+            {/* App Version */}
+            <View style={styles.versionContainer}>
+              <Text style={[styles.versionText, { color: colors.textSecondary }]}>
+                Timero v{'1.0.1'}
+              </Text>
+            </View>
           </ScrollView>
         </View>
       </View>
@@ -488,5 +496,14 @@ const styles = StyleSheet.create({
   },
   languageText: {
     fontSize: 16,
+  },
+  versionContainer: {
+    alignItems: 'center',
+    paddingTop: 20,
+    paddingBottom: 10,
+  },
+  versionText: {
+    fontSize: 12,
+    opacity: 0.6,
   },
 });
